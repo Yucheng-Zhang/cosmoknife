@@ -21,7 +21,6 @@ if __name__ == "__main__":
 
     njr = args.njr
     n_ra = args.nra
-    n_dec = int(njr/n_ra)
     nside = args.nside
 
 
@@ -98,9 +97,10 @@ def make_jk_map(d_dec, nside):
     return jk_map
 
 
-if __name__ == "__main__":
+def knife(rand, njr, n_ra, nside, plot=False):
+    '''Main function.'''
+    n_dec = int(njr/n_ra)
 
-    rand = load_data_pd(args.rand)
     w_total = np.sum(rand[:, 2])
     w_ra = w_total / n_ra
     w_dec = w_ra / n_dec
@@ -110,5 +110,14 @@ if __name__ == "__main__":
 #    print('len(d_dec) == njr :', len(d_dec) == njr)
 
     jk_map = make_jk_map(d_dec, nside)
-    hp.mollview(jk_map, coord='GC')
-    plt.show()
+    if plot:
+        hp.mollview(jk_map, coord='GC')
+        plt.show()
+
+    return jk_map
+
+
+if __name__ == "__main__":
+
+    rand = load_data_pd(args.rand)
+    jk_map = knife(rand, njr, n_ra, nside, plot=True)
