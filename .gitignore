@@ -1,1 +1,4 @@
 *.dat
+*.fits
+test.sh
+*.pyc

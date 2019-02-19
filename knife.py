@@ -3,34 +3,7 @@ Make jackknife regions based on the weights of the random points.
 '''
 import healpy as hp
 import numpy as np
-import pandas as pd
-import argparse
 import matplotlib.pyplot as plt
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Make jackknife regions.')
-    parser.add_argument('-njr', type=int, default=50,
-                        help='Number of jackknife regions.')
-    parser.add_argument('-nra', type=int, default=10,
-                        help='Number of slices in RA.')
-    parser.add_argument('-rand', type=str, default='',
-                        help='Random file, with columns: RA, DEC, Z, weight')
-    parser.add_argument('-nside', type=int, default=256,
-                        help='Jackknife regions will be a Healpix map.')
-    args = parser.parse_args()
-
-    njr = args.njr
-    n_ra = args.nra
-    nside = args.nside
-
-
-def load_data_pd(fn):
-    '''Load random data file.'''
-    print('>> Loading data: {}'.format(fn))
-    tb = pd.read_table(fn, delim_whitespace=True, comment='#', header=None)
-    rand = tb.values
-    # RA, DEC, weight
-    return np.column_stack((rand[:, 0], rand[:, 1], rand[:, 3]))
 
 
 def cut_in_ra(rand, w_ra):
@@ -61,7 +34,6 @@ def cut_in_dec(d_ra, w_dec):
     j = 0
     for i in range(len(d_ra)):
         rand = d_ra[i]  # points in the RA piece
-        del d_ra[i]
         rand = rand[rand[:, 1].argsort()]  # sort each RA piece along DEC
         tmp = 0
         i0 = 0
@@ -78,6 +50,12 @@ def cut_in_dec(d_ra, w_dec):
     return d_dec
 
 
+def save_jk_map(jk_map, fn):
+    '''Save jackknife map to fits file.'''
+    hp.write_map(fn, jk_map, overwrite=True)
+    print(':: Jackknife map saved to file: {}'.format(fn))
+
+
 def make_jk_map(d_dec, nside):
     '''Make healpix map for the jackknife regions.'''
     print('>> Making healpix map for jackknife regions')
@@ -86,18 +64,38 @@ def make_jk_map(d_dec, nside):
     rot = hp.Rotator(coord=['C', 'G'])
     for i in range(len(d_dec)):
         rand = d_dec[i]
-        del d_dec[i]
         # convert to theta, phi used by default in Healpy
         theta_equ, phi_equ = np.deg2rad(90.-rand[:, 1]), np.deg2rad(rand[:, 0])
         theta_gal, phi_gal = rot(theta_equ, phi_equ)
         ipix = hp.ang2pix(nside, theta_gal, phi_gal)
         jk_map[ipix] = i + 1.
 
-    del d_dec
     return jk_map
 
 
-def knife(rand, njr, n_ra, nside, plot=False):
+def save_jk_bounds(jk_bounds, fn):
+    '''Save jackknife bounds to txt file.'''
+    header = 'Number of jackknife regions: {0:d}\n'.format(len(jk_bounds))
+    header += 'RA_min   RA_max   DEC_min   DEC_max'
+    np.savetxt(fn, jk_bounds, header=header)
+    print(':: Jackknife bounds saved to file: {}'.format(fn))
+
+
+def make_jk_bounds(d_dec):
+    '''Make bounds [ra_min, ra_max, dec_min, dec_max] for jackknife regions.'''
+    print('>> Making RA, DEC bounds for jackknife regions')
+    jk_bounds = np.zeros((len(d_dec), 4))
+    for i in range(len(d_dec)):
+        rand = d_dec[i]
+        jk_bounds[i, 0] = np.amin(rand[:, 0])  # RA min
+        jk_bounds[i, 1] = np.amax(rand[:, 0])  # RA max
+        jk_bounds[i, 2] = np.amin(rand[:, 1])  # DEC min
+        jk_bounds[i, 3] = np.amax(rand[:, 1])  # DEC max
+
+    return jk_bounds
+
+
+def knife(rand, njr, n_ra, nside, fmap='', fbounds='', plot=False):
     '''Main function.'''
     n_dec = int(njr/n_ra)
 
@@ -107,17 +105,19 @@ def knife(rand, njr, n_ra, nside, plot=False):
 
     d_ra = cut_in_ra(rand, w_ra)
     d_dec = cut_in_dec(d_ra, w_dec)
-#    print('len(d_dec) == njr :', len(d_dec) == njr)
 
     jk_map = make_jk_map(d_dec, nside)
+    jk_bounds = make_jk_bounds(d_dec)
+
+    if fmap != '':
+        save_jk_map(jk_map, fmap)
+
+    if fbounds != '':
+        save_jk_bounds(jk_bounds, fbounds)
+
     if plot:
+        print(':: Plotting jackknife regions in Healpix map')
         hp.mollview(jk_map, coord='GC')
         plt.show()
 
-    return jk_map
-
-
-if __name__ == "__main__":
-
-    rand = load_data_pd(args.rand)
-    jk_map = knife(rand, njr, n_ra, nside, plot=True)
+    return jk_map, jk_bounds
