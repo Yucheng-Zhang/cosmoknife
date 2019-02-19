@@ -60,7 +60,7 @@ def make_jk_map(d_dec, nside):
     '''Make healpix map for the jackknife regions.'''
     print('>> Making healpix map for jackknife regions')
     npix = hp.nside2npix(nside)
-    jk_map = np.zeros(npix)
+    jk_map = np.zeros(npix) - 1.
     rot = hp.Rotator(coord=['C', 'G'])
     for i in range(len(d_dec)):
         rand = d_dec[i]
@@ -68,7 +68,7 @@ def make_jk_map(d_dec, nside):
         theta_equ, phi_equ = np.deg2rad(90.-rand[:, 1]), np.deg2rad(rand[:, 0])
         theta_gal, phi_gal = rot(theta_equ, phi_equ)
         ipix = hp.ang2pix(nside, theta_gal, phi_gal)
-        jk_map[ipix] = i + 1.
+        jk_map[ipix] = i
 
     return jk_map
 
