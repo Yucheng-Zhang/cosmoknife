@@ -21,9 +21,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Make jackknife regions.')
 
-    parser.add_argument('-njr', type=int, default=50,
+    parser.add_argument('-njr', type=int, default=20,
                         help='Number of jackknife regions.')
-    parser.add_argument('-nra', type=int, default=10,
+    parser.add_argument('-nra', type=int, default=5,
                         help='Number of slices in RA.')
     parser.add_argument('-rand', type=str, default='',
                         help='Random file, with columns: RA, DEC, Z, weight')
