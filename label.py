@@ -27,6 +27,8 @@ def cat_jkl(jkl, me):
     print('-- # points not covered in jk regions: {0:d}'.format(n_lost))
     print('-- percent: {0:f} %'.format(100. * n_lost / n_tot))
 
+    return n_lost
+
 
 def label_bounds(data, jkr):
     '''Get the label for data with jackknife regions marked in bounds.'''
@@ -56,19 +58,20 @@ def label(data, jkr, tp='bounds', f_data=''):
     if tp == 'map':
         print('>> Labeling with map')
         jkl = label_map(data, jkr)
-        cat_jkl(jkl, tp)
+        n_lost = cat_jkl(jkl, tp)
 
     elif tp == 'bounds':
         print('>> Labeling with bounds')
         jkl = label_bounds(data, jkr)
-        cat_jkl(jkl, tp)
+        n_lost = cat_jkl(jkl, tp)
 
     # Jackknife label will be added to the last column of data.
     data = np.column_stack((data, jkl))
 
     # get rid of lost points
-    print('>> Removing points not covered in jackknife regions')
-    data = rm_lost_points(data)
+    if n_lost > 0:
+        print('>> Removing points not covered in jackknife regions')
+        data = rm_lost_points(data)
 
     if f_data != '':
         save_data(data, f_data)
