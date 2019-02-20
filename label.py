@@ -46,6 +46,11 @@ def save_data(data, fn):
     print(':: Data written to file: {}'.format(fn))
 
 
+def rm_lost_points(data):
+    '''Remove the points not covered in jackknife regions.'''
+    return data[data[:, 4] != -1]
+
+
 def label(data, jkr, tp='bounds', f_data=''):
     '''Main function.'''
     if tp == 'map':
@@ -60,6 +65,10 @@ def label(data, jkr, tp='bounds', f_data=''):
 
     # Jackknife label will be added to the last column of data.
     data = np.column_stack((data, jkl))
+
+    # get rid of lost points
+    print('>> Removing points not covered in jackknife regions')
+    data = rm_lost_points(data)
 
     if f_data != '':
         save_data(data, f_data)
