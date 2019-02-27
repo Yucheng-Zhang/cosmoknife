@@ -5,7 +5,7 @@ import numpy as np
 import healpy as hp
 
 
-def label_map(data, jkr):
+def label_map(data, jkr, ll):
     '''Get the label for data with jackknife regions marked in Healpix map.'''
     rot = hp.Rotator(coord=['C', 'G'])
     nside = hp.npix2nside(len(jkr))
@@ -13,7 +13,7 @@ def label_map(data, jkr):
     theta_equ, phi_equ = np.deg2rad(90.-data[:, 1]), np.deg2rad(data[:, 0])
     theta_gal, phi_gal = rot(theta_equ, phi_equ)
     ipix = hp.ang2pix(nside, theta_gal, phi_gal)  # pixel number for each point
-    jkl = jkr[ipix]
+    jkl = ll[jkr[ipix]]
 
     return jkl
 
@@ -30,13 +30,13 @@ def cat_jkl(jkl, me):
     return n_lost
 
 
-def label_bounds(data, jkr):
+def label_bounds(data, jkr, ll):
     '''Get the label for data with jackknife regions marked in bounds.'''
     jkl = np.zeros(len(data[:, 0])) - 1.
     for i, p in enumerate(data):
         for j, r in enumerate(jkr):
             if p[0] >= r[0] and p[0] <= r[1] and p[1] >= r[2] and p[1] <= r[3]:
-                jkl[i] = j
+                jkl[i] = ll[j]
                 break
     return jkl
 
@@ -53,16 +53,19 @@ def rm_lost_points(data):
     return data[data[:, 4] != -1]
 
 
-def label(data, jkr, tp='bounds', f_data=''):
+def label(data, jkr, tp='bounds', f_data='', jk0=0):
     '''Main function.'''
+    # make label list
+    label_list = [jk0+i for i in range(len(jkr))]
+
     if tp == 'map':
         print('>> Labeling with map')
-        jkl = label_map(data, jkr)
+        jkl = label_map(data, jkr, label_list)
         n_lost = cat_jkl(jkl, tp)
 
     elif tp == 'bounds':
         print('>> Labeling with bounds')
-        jkl = label_bounds(data, jkr)
+        jkl = label_bounds(data, jkr, label_list)
         n_lost = cat_jkl(jkl, tp)
 
     # Jackknife label will be added to the last column of data.

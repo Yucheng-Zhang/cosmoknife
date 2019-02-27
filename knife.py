@@ -3,7 +3,6 @@ Make jackknife regions based on the weights of the random points.
 '''
 import healpy as hp
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def cut_in_ra(rand, w_ra):
@@ -50,12 +49,6 @@ def cut_in_dec(d_ra, w_dec):
     return d_dec
 
 
-def save_jk_map(jk_map, fn):
-    '''Save jackknife map to fits file.'''
-    hp.write_map(fn, jk_map, overwrite=True)
-    print(':: Jackknife map saved to file: {}'.format(fn))
-
-
 def make_jk_map(d_dec, nside):
     '''Make healpix map for the jackknife regions.'''
     print('>> Making healpix map for jackknife regions')
@@ -73,14 +66,6 @@ def make_jk_map(d_dec, nside):
     return jk_map
 
 
-def save_jk_bounds(jk_bounds, fn):
-    '''Save jackknife bounds to txt file.'''
-    header = 'Number of jackknife regions: {0:d}\n'.format(len(jk_bounds))
-    header += 'RA_min   RA_max   DEC_min   DEC_max'
-    np.savetxt(fn, jk_bounds, header=header)
-    print(':: Jackknife bounds saved to file: {}'.format(fn))
-
-
 def make_jk_bounds(d_dec):
     '''Make bounds [ra_min, ra_max, dec_min, dec_max] for jackknife regions.'''
     print('>> Making RA, DEC bounds for jackknife regions')
@@ -95,7 +80,7 @@ def make_jk_bounds(d_dec):
     return jk_bounds
 
 
-def knife(rand, njr, n_ra, nside, fmap='', fbounds='', plot=False):
+def knife(rand, njr, n_ra, nside):
     '''Main function.'''
     n_dec = int(njr/n_ra)
 
@@ -108,16 +93,5 @@ def knife(rand, njr, n_ra, nside, fmap='', fbounds='', plot=False):
 
     jk_map = make_jk_map(d_dec, nside)
     jk_bounds = make_jk_bounds(d_dec)
-
-    if fmap != '':
-        save_jk_map(jk_map, fmap)
-
-    if fbounds != '':
-        save_jk_bounds(jk_bounds, fbounds)
-
-    if plot:
-        print(':: Plotting jackknife regions in Healpix map')
-        hp.mollview(jk_map, coord='GC')
-        plt.show()
 
     return jk_map, jk_bounds

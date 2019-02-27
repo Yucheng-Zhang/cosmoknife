@@ -31,6 +31,8 @@ fo_data=data_DR14_QSO_S_rdzwj.dat # output data file
 
 mark=bounds # should be better than map
 
-python jack.py -rand $frand -data $fdata -forand $fo_rand -fodata $fo_data -njr $n_jk -nra $n_ra -fmap $f_map -fbounds $f_bounds -nside $n_side -tp $mark
+jk0=0 # Initial label of jackknife regions. All the labels will be [jk0, jk0+1, ..., jk0+njr-1].
+
+python jack.py -rand $frand -data $fdata -forand $fo_rand -fodata $fo_data -njr $n_jk -nra $n_ra -fmap $f_map -fbounds $f_bounds -nside $n_side -tp $mark -jk0 $jk0
 
 ```
