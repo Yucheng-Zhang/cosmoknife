@@ -10,13 +10,15 @@ def cut_in_ra(rand, w_ra, rra):
     print('>> Cutting in the RA direction')
     d_ra = {}
 
-    if rra != 0.:  # rotate rphi if corss 0
-        print('== Rotate RA for {0:f} degrees'.format(rra))
+    if rra != 0.:  # rotate rra if corss 0
+        print('++ Rotate RA for {0:f} degrees'.format(rra))
         tmp = (rand[:, 0] + rra) % 360.
     else:
         tmp = rand[:, 0]
 
-    rand = rand[tmp.argsort()]  # sort along RA
+    rand = np.column_stack((rand, tmp))
+
+    rand = rand[rand[:, 3].argsort()]  # sort along RA
     tmp = 0.
     i0 = 0
     j = 0
@@ -73,22 +75,19 @@ def make_jk_map(d_dec, nside):
     return jk_map
 
 
-def make_jk_bounds(d_dec):
+def make_jk_bounds(d_dec, rra):
     '''Make bounds [ra_min, ra_max, dec_min, dec_max] for jackknife regions.'''
     print('>> Making RA, DEC bounds for jackknife regions')
     jk_bounds = np.zeros((len(d_dec), 4))
+
     for i in range(len(d_dec)):
         rand = d_dec[i]
-        jk_bounds[i, 0] = np.amin(rand[:, 0])  # RA min
-        jk_bounds[i, 1] = np.amax(rand[:, 0])  # RA max
+        k = np.argmin(rand[:, 3])
+        jk_bounds[i, 0] = rand[k, 0]  # RA min
+        k = np.argmax(rand[:, 3])
+        jk_bounds[i, 1] = rand[k, 0]  # RA max
         jk_bounds[i, 2] = np.amin(rand[:, 1])  # DEC min
         jk_bounds[i, 3] = np.amax(rand[:, 1])  # DEC max
-
-    print('++ Correcting the bounds with RA crossing zero')
-    for i, b in enumerate(jk_bounds):
-        if b[1]-b[0] > 270.:  # need a more general condition
-            # exchange RA min and RA max
-            jk_bounds[i, 0], jk_bounds[i, 1] = jk_bounds[i, 1], jk_bounds[i, 0]
 
     return jk_bounds
 
@@ -105,6 +104,6 @@ def knife(rand, njr, n_ra, nside, rra):
     d_dec = cut_in_dec(d_ra, w_dec)
 
     jk_map = make_jk_map(d_dec, nside)
-    jk_bounds = make_jk_bounds(d_dec)
+    jk_bounds = make_jk_bounds(d_dec, rra)
 
     return jk_map, jk_bounds

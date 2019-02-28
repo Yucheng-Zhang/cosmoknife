@@ -35,9 +35,16 @@ def label_bounds(data, jkr, ll):
     jkl = np.zeros(len(data[:, 0])) - 1.
     for i, p in enumerate(data):
         for j, r in enumerate(jkr):
-            if p[0] >= r[0] and p[0] <= r[1] and p[1] >= r[2] and p[1] <= r[3]:
-                jkl[i] = ll[j]
-                break
+            if p[1] >= r[2] and p[1] <= r[3]:  # DEC
+                if r[0] < r[1]:
+                    if p[0] >= r[0] and p[0] <= r[1]:
+                        jkl[i] = ll[j]
+                        break
+                else:  # regions crossing zero
+                    if p[0] >= r[0] or p[0] <= r[1]:
+                        jkl[i] = ll[j]
+                        break
+
     return jkl
 
 
