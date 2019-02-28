@@ -14,6 +14,9 @@ if __name__ == "__main__":
                         help='Number of jackknife regions.')
     parser.add_argument('-nra', type=int, default=5,
                         help='Number of slices in RA.')
+    parser.add_argument('-rra', type=float, default=0.,
+                        help='Rotation in RA if cross 0.')
+
     parser.add_argument('-rand', type=str, default='',
                         help='Random file, with columns: RA, DEC, Z, weight')
 
@@ -57,7 +60,8 @@ if __name__ == "__main__":
     if args.bdf == '':
         print('====== Making jackknife regions ======')
         rand = miscfuncs.load_data_pd(args.rand, tp='knife')
-        jk_map, jk_bounds = knife.knife(rand, args.njr, args.nra, args.nside)
+        jk_map, jk_bounds = knife.knife(
+            rand, args.njr, args.nra, args.nside, args.rra)
 
         if args.fmap != '':
             miscfuncs.save_jk_map(jk_map, args.fmap)

@@ -5,11 +5,18 @@ import healpy as hp
 import numpy as np
 
 
-def cut_in_ra(rand, w_ra):
-    '''Cut in the RA direction.'''
+def cut_in_ra(rand, w_ra, rra):
+    '''Cut in the RA direction., RA in [0, 360].'''
     print('>> Cutting in the RA direction')
     d_ra = {}
-    rand = rand[rand[:, 0].argsort()]  # sort along RA
+
+    if rra != 0.:  # rotate rphi if corss 0
+        print('== Rotate RA for {0:f} degrees'.format(rra))
+        tmp = (rand[:, 0] + rra) % 360.
+    else:
+        tmp = rand[:, 0]
+
+    rand = rand[tmp.argsort()]  # sort along RA
     tmp = 0.
     i0 = 0
     j = 0
@@ -27,7 +34,7 @@ def cut_in_ra(rand, w_ra):
 
 
 def cut_in_dec(d_ra, w_dec):
-    '''Cut in the DEC direction.'''
+    '''Cut in the DEC direction. DEC in [-90, 90].'''
     print('>> Cutting in the DEC direction')
     d_dec = {}
     j = 0
@@ -80,7 +87,7 @@ def make_jk_bounds(d_dec):
     return jk_bounds
 
 
-def knife(rand, njr, n_ra, nside):
+def knife(rand, njr, n_ra, nside, rra):
     '''Main function.'''
     n_dec = int(njr/n_ra)
 
@@ -88,7 +95,7 @@ def knife(rand, njr, n_ra, nside):
     w_ra = w_total / n_ra
     w_dec = w_ra / n_dec
 
-    d_ra = cut_in_ra(rand, w_ra)
+    d_ra = cut_in_ra(rand, w_ra, rra)
     d_dec = cut_in_dec(d_ra, w_dec)
 
     jk_map = make_jk_map(d_dec, nside)
