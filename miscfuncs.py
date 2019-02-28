@@ -4,6 +4,19 @@ Some misc functions.
 import healpy as hp
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+
+
+def load_data_pd(fn, tp=''):
+    '''Load data file.'''
+    print('>> Loading data: {}'.format(fn))
+    tb = pd.read_table(fn, delim_whitespace=True, comment='#', header=None)
+    tb = tb.values
+    if tp == 'knife':
+        # RA, DEC, weight
+        return np.column_stack((tb[:, 0], tb[:, 1], tb[:, 3]))
+    else:
+        return tb
 
 
 def save_jk_map(jk_map, fn):

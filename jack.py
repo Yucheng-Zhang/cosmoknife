@@ -1,22 +1,9 @@
 import argparse
 import knife
-import pandas as pd
-import numpy as np
 import label
 import sys
 import miscfuncs
-
-
-def load_data_pd(fn, tp=''):
-    '''Load data file.'''
-    print('>> Loading data: {}'.format(fn))
-    tb = pd.read_table(fn, delim_whitespace=True, comment='#', header=None)
-    tb = tb.values
-    if tp == 'knife':
-        # RA, DEC, weight
-        return np.column_stack((tb[:, 0], tb[:, 1], tb[:, 3]))
-    else:
-        return tb
+import numpy as np
 
 
 if __name__ == "__main__":
@@ -56,39 +43,50 @@ if __name__ == "__main__":
                             All the labels will be [jk0, jk0+1, ..., jk0+njr-1]')
     parser.add_argument('-lb', type=int, default=1,
                         help='0: just get jk bounds with random; \
-                            1: label data and random')
+                              1: 0 + label data and random;')
+
+    parser.add_argument('-bdf', type=str, default='',
+                        help='Input jackknife bounds, if provied, \
+                            will do the label directly')
 
     args = parser.parse_args()
 
 
 if __name__ == "__main__":
 
-    print('====== Making jackknife regions ======')
-    rand = load_data_pd(args.rand, tp='knife')
-    jk_map, jk_bounds = knife.knife(rand, args.njr, args.nra, args.nside)
+    if args.bdf == '':
+        print('====== Making jackknife regions ======')
+        rand = miscfuncs.load_data_pd(args.rand, tp='knife')
+        jk_map, jk_bounds = knife.knife(rand, args.njr, args.nra, args.nside)
 
-    if args.fmap != '':
-        miscfuncs.save_jk_map(jk_map, args.fmap)
+        if args.fmap != '':
+            miscfuncs.save_jk_map(jk_map, args.fmap)
 
-    if args.plotmap:
-        miscfuncs.plot_jk_map(jk_map)
+        if args.plotmap:
+            miscfuncs.plot_jk_map(jk_map)
 
-    if args.fbounds != '':
-        miscfuncs.save_jk_bounds(jk_bounds, args.fbounds)
+        if args.fbounds != '':
+            miscfuncs.save_jk_bounds(jk_bounds, args.fbounds)
 
-    if args.tp == 'bounds':
-        jkr = jk_bounds
-    elif args.tp == 'map':
-        jkr = jk_map
-    else:
-        print('>> Error: wrong tp option!')
-        sys.exit()
+        if args.tp == 'bounds':
+            jkr = jk_bounds
+        elif args.tp == 'map':
+            jkr = jk_map
+        else:
+            print('>> Error: wrong tp option!')
+            sys.exit()
 
-    if args.lb == 1:
+    if args.bdf != '':
+        print('>> Loading bounds file: {}'.format(args.bdf))
+        jkr = np.loadtxt(args.bdf)
+
+    if args.lb == 1 or args.bdf != '':
         print('====== Labeling data points ======')
-        data = load_data_pd(args.data)
-        label.label(data, jkr, tp=args.tp, f_data=args.fodata, jk0=args.jk0)
+        data = miscfuncs.load_data_pd(args.data)
+        label.label(data, jkr, tp=args.tp,
+                    f_data=args.fodata, jk0=args.jk0)
 
         print('====== Labeling random points ======')
-        data = load_data_pd(args.rand)
-        label.label(data, jkr, tp=args.tp, f_data=args.forand, jk0=args.jk0)
+        data = miscfuncs.load_data_pd(args.rand)
+        label.label(data, jkr, tp=args.tp,
+                    f_data=args.forand, jk0=args.jk0)
