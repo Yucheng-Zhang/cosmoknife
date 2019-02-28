@@ -84,6 +84,12 @@ def make_jk_bounds(d_dec):
         jk_bounds[i, 2] = np.amin(rand[:, 1])  # DEC min
         jk_bounds[i, 3] = np.amax(rand[:, 1])  # DEC max
 
+    print('++ Correcting the bounds with RA crossing zero')
+    for i, b in enumerate(jk_bounds):
+        if b[1]-b[0] > 270.:  # need a more general condition
+            # exchange RA min and RA max
+            jk_bounds[i, 0], jk_bounds[i, 1] = jk_bounds[i, 1], jk_bounds[i, 0]
+
     return jk_bounds
 
 
