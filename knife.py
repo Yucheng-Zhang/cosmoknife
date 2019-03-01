@@ -10,19 +10,18 @@ def cut_in_ra(rand, w_ra, rra):
     print('>> Cutting in the RA direction')
     d_ra = {}
 
-    if rra != 0.:  # rotate rra if corss 0
+    if rra != 0.:  # rotate rra if cross 0
         print('++ Rotate RA for {0:f} degrees'.format(rra))
         tmp = (rand[:, 0] + rra) % 360.
     else:
         tmp = rand[:, 0]
 
-    rand = np.column_stack((rand, tmp))
+    rand = np.column_stack((rand, tmp))  # helping column for RA
 
     rand = rand[rand[:, 3].argsort()]  # sort along RA
-    tmp = 0.
-    i0 = 0
-    j = 0
+    tmp, i0, j = 0., 0, 0
     nps = len(rand[:, 0])
+
     for i1, p in enumerate(rand, 1):
         tmp += p[2]
         if tmp > w_ra or i1 == nps:  # or reach the end
@@ -62,7 +61,7 @@ def make_jk_map(d_dec, nside):
     '''Make healpix map for the jackknife regions.'''
     print('>> Making healpix map for jackknife regions')
     npix = hp.nside2npix(nside)
-    jk_map = np.zeros(npix) - 1.
+    jk_map = np.full(npix, hp.UNSEEN)
     rot = hp.Rotator(coord=['C', 'G'])
     for i in range(len(d_dec)):
         rand = d_dec[i]

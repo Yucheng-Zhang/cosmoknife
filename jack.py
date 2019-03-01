@@ -52,12 +52,15 @@ if __name__ == "__main__":
                         help='Input jackknife bounds, if provied, \
                             will do the label directly')
 
+    parser.add_argument('-rand_lbed', type=str, default='', help='')
+
     args = parser.parse_args()
 
 
 if __name__ == "__main__":
 
-    if args.bdf == '':
+    # make jackknife regions
+    if args.bdf == '' and args.rand_lbed == '':
         print('====== Making jackknife regions ======')
         rand = miscfuncs.load_data_pd(args.rand, tp='knife')
         jk_map, jk_bounds = knife.knife(
@@ -67,7 +70,8 @@ if __name__ == "__main__":
             miscfuncs.save_jk_map(jk_map, args.fmap)
 
         if args.plotmap:
-            miscfuncs.plot_jk_map(jk_map)
+            print('-- note: not labeled yet, just demo of regions')
+            miscfuncs.plot_jk_map(jk_map, shuffle=True, njr=args.njr)
 
         if args.fbounds != '':
             miscfuncs.save_jk_bounds(jk_bounds, args.fbounds)
@@ -80,11 +84,13 @@ if __name__ == "__main__":
             print('>> Error: wrong tp option!')
             sys.exit()
 
-    if args.bdf != '':
+    # load bounds file if provided
+    if args.bdf != '' and args.rand_lbed == '':
         print('>> Loading bounds file: {}'.format(args.bdf))
         jkr = np.loadtxt(args.bdf)
 
-    if args.lb == 1 or args.bdf != '':
+    # label data and random points
+    if (args.lb == 1 or args.bdf != '') and args.rand_lbed == '':
         print('====== Labeling data points ======')
         data = miscfuncs.load_data_pd(args.data)
         label.label(data, jkr, tp=args.tp,
@@ -94,3 +100,8 @@ if __name__ == "__main__":
         data = miscfuncs.load_data_pd(args.rand)
         label.label(data, jkr, tp=args.tp,
                     f_data=args.forand, jk0=args.jk0)
+
+    # analyze labeled random points
+    if args.rand_lbed != '':
+        rand = miscfuncs.load_data_pd(args.rand_lbed)
+        miscfuncs.analyze_rand(rand)
