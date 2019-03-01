@@ -106,4 +106,4 @@ def analyze_rand(rand):
     print(pcdev)
 
     jk_map = rand2map(rand, 256)
-    plot_jk_map(jk_map)
+    plot_jk_map(jk_map, shuffle=True, njr=njr)
