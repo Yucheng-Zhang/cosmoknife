@@ -102,7 +102,7 @@ def analyze_rand(rand):
         w_jk[np.int(p[4])-jk_min] += p[3]
 
     print('>> Percent deviation from average for each region')
-    pcdev = 100. * np.absolute(w_jk - w_ave) / w_ave
+    pcdev = 100. * (w_jk - w_ave) / w_ave
     print(pcdev)
 
     jk_map = rand2map(rand, 256)

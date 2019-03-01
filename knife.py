@@ -42,8 +42,7 @@ def cut_in_dec(d_ra, w_dec):
     for i in range(len(d_ra)):
         rand = d_ra[i]  # points in the RA piece
         rand = rand[rand[:, 1].argsort()]  # sort each RA piece along DEC
-        tmp = 0
-        i0 = 0
+        tmp, i0 = 0, 0
         nps = len(rand[:, 0])
         for i1, p in enumerate(rand, 1):
             tmp += p[2]
