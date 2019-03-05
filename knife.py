@@ -24,7 +24,7 @@ def cut_in_ra(rand, w_ra, rra):
 
     for i1, p in enumerate(rand, 1):
         tmp += p[2]
-        if tmp > w_ra or i1 == nps:  # or reach the end
+        if tmp > w_ra[j] or i1 == nps:  # or reach the end
             d_ra[j] = rand[i0:i1, :]
             j += 1
             tmp = 0.
@@ -90,15 +90,22 @@ def make_jk_bounds(d_dec, rra):
     return jk_bounds
 
 
-def knife(rand, njr, n_ra, nside, rra):
+def knife(rand, njr, nra, nside, rra):
     '''Main function.'''
-    n_dec = int(njr/n_ra)
-
     w_total = np.sum(rand[:, 2])
-    w_ra = w_total / n_ra
-    w_dec = w_ra / n_dec
+    w_dec = w_total / njr  # weight for final jackknife regions
+
+    # make weights for RA pieces
+    if njr % nra == 0:
+        w_ra = np.full(nra, w_total/nra)
+    else:
+        res = njr % (nra-1)
+        ndec = (njr - res) / (nra - 1)
+        w_ra = np.full(nra - 1, ndec * w_dec)
+        w_ra = np.append(w_ra, res * w_dec)
 
     d_ra = cut_in_ra(rand, w_ra, rra)
+
     d_dec = cut_in_dec(d_ra, w_dec)
 
     jk_map = make_jk_map(d_dec, nside)

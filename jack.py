@@ -20,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument('-rand', type=str, default='',
                         help='Random file, with columns: RA, DEC, Z, weight')
 
-    parser.add_argument('-nside', type=int, default=256,
+    parser.add_argument('-nside', type=int, default=512,
                         help='Jackknife regions will be a Healpix map.')
     parser.add_argument('-plotmap', type=int, default=1,
                         help='Plot jackknife healpix map.')
