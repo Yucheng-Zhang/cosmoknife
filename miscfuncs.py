@@ -81,7 +81,7 @@ def rand2map(rand, nside):
     return jk_map
 
 
-def analyze_rand(rand):
+def analyze_rand(rand, sf):
     '''Analyze the labeled random points.
     Columns in [0:RA, 1:DEC, 2:Z, 3:weight, 4:jackknife label].'''
 
@@ -106,4 +106,4 @@ def analyze_rand(rand):
     print(pcdev)
 
     jk_map = rand2map(rand, 256)
-    plot_jk_map(jk_map, shuffle=True, njr=njr)
+    plot_jk_map(jk_map, shuffle=sf, njr=njr)

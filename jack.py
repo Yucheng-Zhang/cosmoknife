@@ -24,6 +24,8 @@ if __name__ == "__main__":
                         help='Jackknife regions will be a Healpix map.')
     parser.add_argument('-plotmap', type=int, default=1,
                         help='Plot jackknife healpix map.')
+    parser.add_argument('-sf', type=int, default=0,
+                        help='Shuffle(1) or not(0) when plotting.')
 
     parser.add_argument('-fmap', type=str, default='',
                         help='Output jackknife regions in Healpix map.')
@@ -71,7 +73,7 @@ if __name__ == "__main__":
 
         if args.plotmap:
             print('-- note: not labeled yet, just demo of regions')
-            miscfuncs.plot_jk_map(jk_map, shuffle=True, njr=args.njr)
+            miscfuncs.plot_jk_map(jk_map, shuffle=args.sf, njr=args.njr)
 
         if args.fbounds != '':
             miscfuncs.save_jk_bounds(jk_bounds, args.fbounds)
@@ -104,4 +106,4 @@ if __name__ == "__main__":
     # analyze labeled random points
     if args.rand_lbed != '':
         rand = miscfuncs.load_data_pd(args.rand_lbed)
-        miscfuncs.analyze_rand(rand)
+        miscfuncs.analyze_rand(rand, args.sf)
