@@ -2,3 +2,4 @@
 *.fits
 test.sh
 *.pyc
+.vscode/

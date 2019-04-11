@@ -3,10 +3,13 @@ Make jackknife regions based on the weights of the random points.
 '''
 import healpy as hp
 import numpy as np
+import miscfuncs
+import label
+import sys
 
 
 def cut_in_ra(rand, w_ra, rra):
-    '''Cut in the RA direction., RA in [0, 360].'''
+    '''Cut in the RA direction. RA in [0, 360].'''
     print('>> Cutting in the RA direction')
     d_ra = {}
 
@@ -91,7 +94,7 @@ def make_jk_bounds(d_dec, rra):
 
 
 def knife(rand, njr, nra, nside, rra):
-    '''Main function.'''
+    '''Knife function.'''
     w_total = np.sum(rand[:, 2])
     w_dec = w_total / njr  # weight for final jackknife regions
 
@@ -112,3 +115,53 @@ def knife(rand, njr, nra, nside, rra):
     jk_bounds = make_jk_bounds(d_dec, rra)
 
     return jk_map, jk_bounds
+
+
+def main_knife(args):
+    '''Main function for jackknife with randoms.'''
+    # make jackknife regions
+    if args.bdf == '' and args.rand_lbed == '':
+        print('====== Making jackknife regions ======')
+        rand = miscfuncs.load_data_pd(args.rand, tp='knife')
+        jk_map, jk_bounds = knife(
+            rand, args.njr, args.nra, args.nside, args.rra)
+
+        if args.fmap != '':
+            miscfuncs.save_jk_map(jk_map, args.fmap)
+
+        if args.plotmap:
+            print('-- note: not labeled yet, just demo of regions')
+            miscfuncs.plot_jk_map(jk_map, shuffle=args.sf, njr=args.njr)
+
+        if args.fbounds != '':
+            miscfuncs.save_jk_bounds(jk_bounds, args.fbounds)
+
+        if args.tp == 'bounds':
+            jkr = jk_bounds
+        elif args.tp == 'map':
+            jkr = jk_map
+        else:
+            print('>> Error: wrong tp option!')
+            sys.exit()
+
+    # load bounds file if provided
+    if args.bdf != '' and args.rand_lbed == '':
+        print('>> Loading bounds file: {}'.format(args.bdf))
+        jkr = np.loadtxt(args.bdf)
+
+    # label data and random points
+    if (args.lb == 1 or args.bdf != '') and args.rand_lbed == '':
+        print('====== Labeling data points ======')
+        data = miscfuncs.load_data_pd(args.data)
+        label.label(data, jkr, tp=args.tp,
+                    f_data=args.fodata, jk0=args.jk0)
+
+        print('====== Labeling random points ======')
+        data = miscfuncs.load_data_pd(args.rand)
+        label.label(data, jkr, tp=args.tp,
+                    f_data=args.forand, jk0=args.jk0)
+
+    # analyze labeled random points
+    if args.rand_lbed != '':
+        rand = miscfuncs.load_data_pd(args.rand_lbed)
+        miscfuncs.analyze_rand(rand, args.sf)
