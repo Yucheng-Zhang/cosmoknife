@@ -13,7 +13,7 @@ def get_ra_dec(theta, phi):
     theta_equ, phi_equ = rot(theta, phi)
     dec, ra = 90. - np.rad2deg(theta_equ), np.rad2deg(phi_equ)
     # move RA in [-180,0) to [180,360)
-    ra = np.where(ra < 0., ra + 180., ra)
+    ra = np.where(ra < 0., ra + 360., ra)
 
     return ra, dec
 
