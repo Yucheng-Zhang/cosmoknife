@@ -152,10 +152,10 @@ def sep_mask_ra(fmask, RAs, fo):
     mask1 = np.where((RAs[0] < ra) & (ra < RAs[1]), mask, us)
     mask2 = np.where((RAs[0] > ra) | (ra > RAs[1]), mask, us)
 
-    hp.write_map(fo[0], mask1)
+    hp.write_map(fo[0], mask1, overwrite=True)
     print('>> Mask 1 written to: {}'.format(fo[0]))
     print('>> Mask 1 total weights: {0:f}'.format(np.sum(mask1)))
 
-    hp.write_map(fo[1], mask2)
+    hp.write_map(fo[1], mask2, overwrite=True)
     print('>> Mask 2 written to: {}'.format(fo[1]))
     print('>> Mask 2 total weights: {0:f}'.format(np.sum(mask2)))
