@@ -136,7 +136,7 @@ def get_ra_dec(theta, phi):
 
 
 def sep_mask_ra(fmask, RAs, fo):
-    '''Seperate one mask into two in RA direction.'''
+    '''Seperate one mask into two in RA direction. [0,360]'''
     print('>> Loading mask: {}'.format(fmask))
     mask = hp.read_map(fmask)
     nside = hp.get_nside(mask)
@@ -153,6 +153,9 @@ def sep_mask_ra(fmask, RAs, fo):
     mask2 = np.where((RAs[0] > ra) | (ra > RAs[1]), mask, us)
 
     hp.write_map(fo[0], mask1)
-    print('>> Mask 1 written to: {}'.format(mask1))
+    print('>> Mask 1 written to: {}'.format(fo[0]))
+    print('>> Mask 1 total weights: {0:f}'.format(np.sum(mask1)))
+
     hp.write_map(fo[1], mask2)
-    print('>> Mask 2 written to: {}'.format(mask2))
+    print('>> Mask 2 written to: {}'.format(fo[1]))
+    print('>> Mask 2 total weights: {0:f}'.format(np.sum(mask2)))
