@@ -44,13 +44,14 @@ def knife(data, njr, nra, nside, rra):
 def main_mask(args):
     '''Main function for jackknife with mask.
     Value on each pixel should be in range [0, 1] or hp.UNSEEN+(0,1].'''
+    print('>> Loading mask: {}'.format(args.mask))
     mask = hp.read_map(args.mask)
     nside = hp.get_nside(mask)
     npix = hp.nside2npix(nside)
     ipix = np.array([i for i in range(npix)])
 
     # cut off the pixels with value 0 or UNSEEN
-    idx = np.where(mask not in [0., hp.UNSEEN])
+    idx = np.where((mask != 0.) * (mask != hp.UNSEEN))
     mask, ipix = mask[idx], ipix[idx]
 
     theta, phi = hp.pix2ang(nside, ipix)
