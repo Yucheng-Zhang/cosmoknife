@@ -4,18 +4,7 @@ Make jackknife regions based on the mask.
 import numpy as np
 import healpy as hp
 from kniferand import cut_in_dec, cut_in_ra, make_jk_map
-import miscfuncs
-
-
-def get_ra_dec(theta, phi):
-    '''Get RA, DEC [degree] from theta, phi [radians].'''
-    rot = hp.Rotator(coord=['G', 'C'])
-    theta_equ, phi_equ = rot(theta, phi)
-    dec, ra = 90. - np.rad2deg(theta_equ), np.rad2deg(phi_equ)
-    # move RA in [-180,0) to [180,360)
-    ra = np.where(ra < 0., ra + 360., ra)
-
-    return ra, dec
+import miscfuncs as mf
 
 
 def knife(data, njr, nra, nside, rra):
@@ -51,17 +40,17 @@ def main_mask(args):
     ipix = np.array([i for i in range(npix)])
 
     # cut off the pixels with value 0 or UNSEEN
-    idx = np.where((mask != 0.) * (mask != hp.UNSEEN))
+    idx = np.where((mask != 0.) & (mask != hp.UNSEEN))
     mask, ipix = mask[idx], ipix[idx]
 
     theta, phi = hp.pix2ang(nside, ipix)
-    ra, dec = get_ra_dec(theta, phi)
+    ra, dec = mf.get_ra_dec(theta, phi)
     data = np.column_stack((ra, dec, mask))
 
     jk_map = knife(data, args.njr, args.nra, nside, args.rra)
 
     if args.plotmap:
-        miscfuncs.plot_jk_map(jk_map, shuffle=args.sf, njr=args.njr)
+        mf.plot_jk_map(jk_map, shuffle=args.sf, njr=args.njr)
 
     if args.fmap != '':
-        miscfuncs.save_jk_map(jk_map, args.fmap)
+        mf.save_jk_map(jk_map, args.fmap)

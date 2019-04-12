@@ -107,3 +107,52 @@ def analyze_rand(rand, sf):
 
     jk_map = rand2map(rand, 256)
     plot_jk_map(jk_map, shuffle=sf, njr=njr)
+
+
+def merge_masks(fmasks, nside, fo):
+    '''Merge masks each with jk labels start from 0.'''
+    npix = hp.nside2npix(nside)
+    mask_tot = np.full(npix, hp.UNSEEN)
+    njr = 0
+    for fn in fmasks:
+        print('>> Loading mask: {}'.format(fn))
+        mask = hp.read_map(fn)
+        mask_tot = np.where(mask != hp.UNSEEN, mask + njr, mask_tot)
+        njr = np.amax(mask) + 1
+
+    hp.write_map(fo, mask_tot)
+    print('>> Merged mask written to file: {}'.format(fo))
+
+
+def get_ra_dec(theta, phi):
+    '''Get RA, DEC [degree] from theta, phi [radians].'''
+    rot = hp.Rotator(coord=['G', 'C'])
+    theta_equ, phi_equ = rot(theta, phi)
+    dec, ra = 90. - np.rad2deg(theta_equ), np.rad2deg(phi_equ)
+    # move RA in [-180,0) to [180,360)
+    ra = np.where(ra < 0., ra + 360., ra)
+
+    return ra, dec
+
+
+def sep_mask_ra(fmask, RAs, fo):
+    '''Seperate one mask into two in RA direction.'''
+    print('>> Loading mask: {}'.format(fmask))
+    mask = hp.read_map(fmask)
+    nside = hp.get_nside(mask)
+    npix = hp.nside2npix(nside)
+    ipix = np.array([i for i in range(npix)])
+
+    us = np.min(mask)
+
+    theta, phi = hp.pix2ang(nside, ipix)
+    ra, dec = get_ra_dec(theta, phi)
+    del dec
+
+    mask1 = np.where((RAs[0] < ra) & (ra < RAs[1]), mask, us)
+    mask2 = np.where((RAs[0] > ra) | (ra > RAs[1]), mask, us)
+
+    hp.write_map(fo[0], mask1)
+    print('>> Mask 1 written to: {}'.format(mask1))
+    hp.write_map(fo[1], mask2)
+    print('>> Mask 2 written to: {}'.format(mask2))

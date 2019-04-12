@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     #--- General options ---#
     parser.add_argument('-me', type=str, default='',
-                        help='rand or mask.')
+                        help='[rand, mask]')
     parser.add_argument('-njr', type=int, default=20,
                         help='Number of jackknife regions.')
     parser.add_argument('-nra', type=int, default=5,
