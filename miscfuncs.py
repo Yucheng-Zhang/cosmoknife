@@ -168,7 +168,7 @@ def make_jk_masks(fmask, fjkmask, froot):
     '''Make jackknife masks.'''
     mask = hp.read_map(fmask)  # read in the total mask
     jkmask = hp.read_map(fjkmask)  # read in jk map with labels
-    njk = np.amax(jkmask) + 1  # number of jk regions
+    njk = int(np.amax(jkmask)) + 1  # number of jk regions
 
     o_mask_fns = [froot + 'mask-jk-{0:d}.fits'.format(i) for i in range(njk)]
 
