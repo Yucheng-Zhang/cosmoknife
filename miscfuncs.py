@@ -123,6 +123,9 @@ def merge_masks(fmasks, nside, fo):
     hp.write_map(fo, mask_tot)
     print('>> Merged mask written to file: {}'.format(fo))
 
+    hp.mollview(mask_tot, coord='GC')
+    plt.show()
+
 
 def get_ra_dec(theta, phi):
     '''Get RA, DEC [degree] from theta, phi [radians].'''
