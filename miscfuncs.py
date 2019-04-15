@@ -159,3 +159,17 @@ def sep_mask_ra(fmask, RAs, fo):
     hp.write_map(fo[1], mask2, overwrite=True)
     print('>> Mask 2 written to: {}'.format(fo[1]))
     print('>> Mask 2 total weights: {0:f}'.format(np.sum(mask2)))
+
+
+def make_jk_masks(fmask, fjkmask, froot):
+    '''Make jackknife masks.'''
+    mask = hp.read_map(fmask)  # read in the total mask
+    jkmask = hp.read_map(fjkmask)  # read in jk map with labels
+    njk = np.amax(jkmask) + 1  # number of jk regions
+
+    o_mask_fns = [froot + 'mask-jk-{0:d}.fits'.format(i) for i in range(njk)]
+
+    for i in range(njk):
+        print('>> jk mask {0:d}: {1:s}'.format(i, o_mask_fns[i]))
+        mask_i = np.where(jkmask == i, 0., mask)
+        hp.write_map(o_mask_fns[i], mask_i)
