@@ -8,9 +8,8 @@ import miscfuncs as mf
 import sys
 
 
-def label_map(data, jkr, ll):
+def label_map(data, jkr):
     '''Get the label for data with jackknife regions marked in Healpix map.'''
-    jkl = np.zeros(len(data[:, 0])) - 1.
 
     rot = hp.Rotator(coord=['C', 'G'])
     nside = hp.npix2nside(len(jkr))
@@ -19,7 +18,8 @@ def label_map(data, jkr, ll):
     theta_gal, phi_gal = rot(theta_equ, phi_equ)
     ipix = hp.ang2pix(nside, theta_gal, phi_gal)  # pixel number for each point
 
-    jkl = ll[jkr[ipix]]
+    jkl = jkr[ipix]
+    np.where(jkl != hp.UNSEEN, jkl, -1)
 
     return jkl
 
@@ -38,7 +38,7 @@ def cat_jkl(jkl, me):
 
 def label_bounds(data, jkr, ll):
     '''Get the label for data with jackknife regions marked in bounds.'''
-    jkl = np.zeros(len(data[:, 0])) - 1.
+    jkl = np.zeros(len(data[:, 0])) - 1
     for i, p in enumerate(data):
         for j, r in enumerate(jkr):
             if p[1] >= r[2] and p[1] <= r[3]:  # DEC
@@ -57,7 +57,8 @@ def label_bounds(data, jkr, ll):
 def save_data(data, fn):
     '''Save the output data with jk label.'''
     header = 'RA   DEC   redshift   weight   jackknife'
-    np.savetxt(fn, data, header=header)
+    fmt = '%.15e   %.15e   %.15e   %.15e   %-8d'
+    np.savetxt(fn, data, fmt=fmt, header=header)
     print(':: Data written to file: {}'.format(fn))
 
 
@@ -69,10 +70,10 @@ def rm_lost_points(data):
 def label(data, jkr, tp, ana, f_data='', jk0=0):
     '''Main function.'''
     # make label list
-    label_list = [jk0+i for i in range(len(jkr))]
+    label_list = np.array([jk0+i for i in range(len(jkr))])
 
     if tp == 'map':
-        jkl = label_map(data, jkr, label_list)
+        jkl = label_map(data, jkr)
         n_lost = cat_jkl(jkl, tp)
 
     elif tp == 'bounds':
