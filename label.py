@@ -57,7 +57,7 @@ def label_bounds(data, jkr, ll):
 def save_data(data, fn):
     '''Save the output data with jk label.'''
     header = 'RA   DEC   redshift   weight   jackknife'
-    fmt = '%>2.15e   %>2.15e   %>2.15e   %>2.15e   %>8d'
+    fmt = '% .15e   % .15e   % .15e   % .15e   %>8d'
     np.savetxt(fn, data, fmt=fmt, header=header)
     print(':: Data written to file: {}'.format(fn))
 
