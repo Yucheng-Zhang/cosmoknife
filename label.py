@@ -66,20 +66,16 @@ def rm_lost_points(data):
     return data[data[:, 4] != -1]
 
 
-def label(data, jkr, tp, f_data='', jk0=0):
+def label(data, jkr, tp, ana, f_data='', jk0=0):
     '''Main function.'''
     # make label list
     label_list = [jk0+i for i in range(len(jkr))]
 
     if tp == 'map':
-        print('>> Labeling with map {}'.format(jkr))
-        jkr = hp.read_map(jkr)
         jkl = label_map(data, jkr, label_list)
         n_lost = cat_jkl(jkl, tp)
 
     elif tp == 'bounds':
-        print('>> Labeling with bounds {}'.format(jkr))
-        jkr = np.loadtxt(jkr)
         jkl = label_bounds(data, jkr, label_list)
         n_lost = cat_jkl(jkl, tp)
 
@@ -97,6 +93,9 @@ def label(data, jkr, tp, f_data='', jk0=0):
     if f_data != '':
         save_data(data, f_data)
 
+    if ana:
+        mf.analyze_rand(data, sf=1)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -109,6 +108,8 @@ if __name__ == "__main__":
     parser.add_argument('-jkr', type=str, default='',
                         help='file with jackknife regions.')
     parser.add_argument('-fo', type=str, default='', help='output file.')
+    parser.add_argument('-ana', type=int, default=0,
+                        help='analyze the label points.')
 
     args = parser.parse_args()
 
@@ -116,14 +117,14 @@ if __name__ == "__main__":
     data = mf.load_data_pd(args.data)
 
     if args.tp == 'map':
-        print('>> Labeling with map {}'.format(jkr))
-        jkr = hp.read_map(jkr)
+        print('>> Labeling with map {}'.format(args.jkr))
+        jkr = hp.read_map(args.jkr)
 
     elif args.tp == 'bounds':
-        print('>> Labeling with bounds {}'.format(jkr))
-        jkr = np.loadtxt(jkr)
+        print('>> Labeling with bounds {}'.format(args.jkr))
+        jkr = np.loadtxt(args.jkr)
 
     else:
         sys.exit('Wrong -tp.')
 
-    label(data, jkr, args.tp, f_data=args.fo)
+    label(data, jkr, args.tp, args.ana, f_data=args.fo)
