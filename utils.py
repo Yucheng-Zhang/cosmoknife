@@ -1,41 +1,71 @@
 '''
-Script to use some useful functions.
+Some useful functions.
 '''
-import argparse
-import miscfuncs as mf
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Useful funcs for jackknife analysis.')
-
-    parser.add_argument('-func', type=str, default='',
-                        help='''Function to use.''')
-    #--- 0: merge_masks ---#
-    parser.add_argument('-fmasks0', type=str, nargs='+',
-                        help='Masks to merge.')
-    parser.add_argument('-nside0', type=int, help='nside of the masks.')
-    parser.add_argument('-fo0', type=str, default='merged-mask.fits')
-    #--- 1: sep_mask_ra ---#
-    parser.add_argument('-fmask1', type=str, help='Mask to seperate.')
-    parser.add_argument('-RAs1', type=float, nargs='+',
-                        help='Two seperations in RA.')
-    parser.add_argument('-fo1', type=str, nargs='+',
-                        default=['sep-mask1.fits', 'sep-mask2.fits'])
-    #--- 2: make_jk_masks ---#
-    parser.add_argument('-fmask2', type=str)
-    parser.add_argument('-fjkmask2', type=str)
-    parser.add_argument('-froot2', type=str)
-
-    args = parser.parse_args()
+import pandas as pd
+import numpy as np
+import healpy as hp
 
 
-if __name__ == "__main__":
+#--- General ---#
 
-    if args.func == 'merge_masks':
-        mf.merge_masks(args.fmasks0, args.nside0, args.fo0)
-    elif args.func == 'sep_mask_ra':
-        mf.sep_mask_ra(args.fmask1, args.RAs1, args.fo1)
-    elif args.func == 'make_jk_masks':
-        mf.make_jk_masks(args.fmask2, args.fjkmask2, args.froot2)
+
+def load_data_pd(fn, tp=''):
+    '''Load data file.'''
+    print('>> Loading data: {}'.format(fn))
+    tb = pd.read_table(fn, delim_whitespace=True, comment='#', header=None)
+    tb = tb.values
+    if tp == 'knife':
+        # RA, DEC, weight
+        return np.column_stack((tb[:, 0], tb[:, 1], tb[:, 3]))
     else:
-        pass
+        return tb
+
+
+def get_ra_dec(theta, phi):
+    '''Get RA, DEC [degree] from theta, phi [radians] used in Healpy.'''
+    rot = hp.Rotator(coord=['G', 'C'])
+    theta_equ, phi_equ = rot(theta, phi)
+    dec, ra = 90. - np.rad2deg(theta_equ), np.rad2deg(phi_equ)
+    # move RA in [-180,0) to [180,360)
+    ra = np.where(ra < 0., ra + 360., ra)
+
+    return ra, dec
+
+
+def get_theta_phi(ra, dec):
+    '''Get theta, phi [radians] used in Healpy from RA, DEC [degree].'''
+    rot = hp.Rotator(coord=['C', 'G'])
+    theta_equ, phi_equ = np.deg2rad(90.-dec), np.deg2rad(ra)
+    theta_gal, phi_gal = rot(theta_equ, phi_equ)
+
+    return theta_gal, phi_gal
+
+
+#--- Map ---#
+
+
+def save_jk_map(jk_map, fn):
+    '''Save jackknife map to fits file.'''
+    hp.write_map(fn, jk_map, overwrite=True)
+    print(':: Jackknife map saved to file: {}'.format(fn))
+
+
+#--- Bounds ---#
+
+
+def save_bounds(jk_bounds, fn):
+    '''Save jackknife bounds to txt file.'''
+    header = 'Number of jackknife regions: {0:d}\n'.format(len(jk_bounds))
+    header += 'RA_min   RA_max   DEC_min   DEC_max'
+    np.savetxt(fn, jk_bounds, header=header)
+    print(':: Jackknife bounds saved to file: {}'.format(fn))
+
+
+def combine_bounds(bds):
+    '''Combine a few bounds into one.'''
+    for i, bd in enumerate(bds):
+        if i == 0:
+            data = bd
+            continue
+        data = np.row_stack((data, bd))
+    return data
