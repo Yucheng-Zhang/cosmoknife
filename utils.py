@@ -4,6 +4,7 @@ Some useful functions.
 import pandas as pd
 import numpy as np
 import healpy as hp
+import matplotlib.pyplot as plt
 
 
 #--- General ---#
@@ -48,6 +49,23 @@ def save_jk_map(jk_map, fn):
     '''Save jackknife map to fits file.'''
     hp.write_map(fn, jk_map, overwrite=True)
     print(':: Jackknife map saved to file: {}'.format(fn))
+
+
+def plot_jk_map(jk_map, shuffle=False, njr=0):
+    '''Plot jackknife map.'''
+    print(':: Plotting jackknife regions in Healpix map')
+    if shuffle:
+        print('-- shuffle the labels, looks better, demo only')
+        lb_max = np.int(np.amax(jk_map))
+        lb_min = lb_max - njr + 1
+        arr = np.array([i for i in range(lb_min, lb_max+1, 1)])
+        np.random.shuffle(arr)
+        for i, p in enumerate(jk_map):
+            if p != hp.UNSEEN:
+                jk_map[i] = arr[np.int(p)-lb_min]
+
+    hp.mollview(jk_map, coord='GC', title='jackknife regions')
+    plt.show()
 
 
 #--- Bounds ---#
