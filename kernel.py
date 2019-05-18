@@ -69,7 +69,8 @@ def knife(data, njr, nra, rra):
         res = njr % (nra-1)
         ndec = (njr - res) / (nra - 1)
         w_ra = np.full(nra - 1, ndec * w_dec)
-        w_ra = np.append(w_ra, res * w_dec)
+        if res != 0:
+            w_ra = np.append(w_ra, res * w_dec)
 
     d_ra = cut_in_ra(data, w_ra, rra)
     d_dec = cut_in_dec(d_ra, w_dec)
