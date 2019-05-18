@@ -1,8 +1,8 @@
 '''
 Make jackknife regions.
 '''
-import utils
-import kernel
+from . import utils
+from . import kernel
 import numpy as np
 import healpy as hp
 

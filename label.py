@@ -1,7 +1,7 @@
 '''
 Label points with jackknife regions.
 '''
-import utils
+from . import utils
 import numpy as np
 import healpy as hp
 

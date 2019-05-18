@@ -3,7 +3,7 @@ Kernel functions.
 '''
 import numpy as np
 import healpy as hp
-import utils
+from . import utils
 
 
 def cut_in_ra(rand, w_ra, rra):
