@@ -104,7 +104,7 @@ def make_jk_map(d_dec, nside):
     for i in range(len(d_dec)):
         rand = d_dec[i]
         # convert to theta, phi used by default in Healpy
-        theta_gal, phi_gal = utils.get_theta_phi(rand[:, 0], rand[:1])
+        theta_gal, phi_gal = utils.get_theta_phi(rand[:, 0], rand[:, 1])
         ipix = hp.ang2pix(nside, theta_gal, phi_gal)
         jk_map[ipix] = i
 
