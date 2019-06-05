@@ -6,7 +6,7 @@ import healpy as hp
 from . import utils
 
 
-def cut_in_ra(rand, w_ra, rra):
+def cut_in_ra(rand, w_ra, rra, nra):
     '''Cut in the RA direction. RA in [0, 360].'''
     print('>> Cutting in the RA direction')
     d_ra = {}
@@ -23,13 +23,18 @@ def cut_in_ra(rand, w_ra, rra):
     tmp, i0, j = 0., 0, 0
     nps = len(rand[:, 0])
 
+    counter = 0
     for i1, p in enumerate(rand, 1):
         tmp += p[2]
-        if tmp > w_ra[j] or i1 == nps:  # or reach the end
+        if tmp > w_ra[j]:
+            counter += 1
             d_ra[j] = rand[i0:i1, :]
             j += 1
             tmp = 0.
             i0 = i1
+            if counter == nra - 1:
+                d_ra[j] = rand[i0:, :]
+                break
 
     del rand
     return d_ra
@@ -48,16 +53,16 @@ def cut_in_dec(d_ra, w_dec, n_dec):
         counter = 0
         for i1, p in enumerate(rand, 1):
             tmp += p[2]
-            if tmp > w_dec or i1 == nps:  # or reach the end
+            if tmp > w_dec:
                 counter += 1
-                if counter == n_dec[i]:
-                    d_dec[j] = rand[i0:, :]
-                    j += 1
-                    break
                 d_dec[j] = rand[i0:i1, :]
                 j += 1
                 tmp = 0.
                 i0 = i1
+                if counter == n_dec[i] - 1:
+                    d_dec[j] = rand[i0:, :]
+                    j += 1
+                    break
 
     del d_ra
     return d_dec
@@ -81,7 +86,7 @@ def knife(data, njr, nra, rra):
             w_ra = np.append(w_ra, res * w_dec)
             n_dec = np.append(n_dec, res)
 
-    d_ra = cut_in_ra(data, w_ra, rra)
+    d_ra = cut_in_ra(data, w_ra, rra, nra)
 
     d_dec = cut_in_dec(d_ra, w_dec, n_dec)
 
