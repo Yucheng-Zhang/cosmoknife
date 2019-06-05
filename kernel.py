@@ -25,7 +25,7 @@ def cut_in_ra(rand, w_ra, rra):
 
     for i1, p in enumerate(rand, 1):
         tmp += p[2]
-        if tmp > w_ra[j] or i1 == nps:  # or reach the end
+        if tmp > w_ra[j] or i1 >= nps-2:  # or reach the end (2 for error)
             d_ra[j] = rand[i0:i1, :]
             j += 1
             tmp = 0.
@@ -47,7 +47,7 @@ def cut_in_dec(d_ra, w_dec):
         nps = len(rand[:, 0])
         for i1, p in enumerate(rand, 1):
             tmp += p[2]
-            if tmp > w_dec or i1 == nps:
+            if tmp > w_dec or i1 >= nps-2:  # or reach the end (2 for error)
                 d_dec[j] = rand[i0:i1, :]
                 j += 1
                 tmp = 0.
