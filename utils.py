@@ -51,7 +51,7 @@ def save_jk_map(jk_map, fn):
     print(':: Jackknife map saved to file: {}'.format(fn))
 
 
-def plot_jk_map(jk_map, shuffle=False, njr=0):
+def plot_jk_map(jk_map, shuffle=False, njr=0, cmap=None):
     '''Plot jackknife map.'''
     print(':: Plotting jackknife regions in Healpix map')
     if shuffle:
@@ -63,19 +63,22 @@ def plot_jk_map(jk_map, shuffle=False, njr=0):
         for i, p in enumerate(jk_map):
             if p != hp.UNSEEN:
                 jk_map[i] = arr[np.int(p)-lb_min]
-
-    hp.mollview(jk_map, coord='GC', title='jackknife regions')
+    if cmap is None:
+        hp.mollview(jk_map, coord='GC', title='jackknife regions')
+    else:
+        hp.mollview(jk_map, coord='GC', cmap=cmap, title='jackknife regions')
     plt.show()
 
 
 def merge_jk_maps(maps, fo=None):
     '''Merge jk maps each with label start from 0.'''
-    npix = len(masks[0])
+    npix = len(maps[0])
     map_tot = np.full(npix, hp.UNSEEN)
     njr = 0
-    for map_ in maps:
+    for i in range(len(maps)):
+        map_ = maps[i]
         map_tot = np.where(map_ != hp.UNSEEN, map_ + njr, map_tot)
-        njr = np.amax(map_) + 1
+        njr += np.amax(map_) + 1
 
     if fo is not None:
         hp.write_map(fo, map_tot)
