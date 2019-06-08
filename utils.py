@@ -68,6 +68,22 @@ def plot_jk_map(jk_map, shuffle=False, njr=0):
     plt.show()
 
 
+def merge_jk_maps(maps, fo=None):
+    '''Merge jk maps each with label start from 0.'''
+    npix = len(masks[0])
+    map_tot = np.full(npix, hp.UNSEEN)
+    njr = 0
+    for map_ in maps:
+        map_tot = np.where(map_ != hp.UNSEEN, map_ + njr, map_tot)
+        njr = np.amax(map_) + 1
+
+    if fo is not None:
+        hp.write_map(fo, map_tot)
+        print('>> Merged jackknife map written to file: {}'.format(fo))
+
+    return map_tot
+
+
 #--- Bounds ---#
 
 
