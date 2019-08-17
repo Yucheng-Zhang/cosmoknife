@@ -13,13 +13,13 @@ import matplotlib.pyplot as plt
 def load_data_pd(fn, tp=''):
     '''Load data file.'''
     print('>> Loading data: {}'.format(fn))
-    tb = pd.read_table(fn, delim_whitespace=True, comment='#', header=None)
-    tb = tb.values
+    df = pd.read_csv(fn, delim_whitespace=True, comment='#', header=None)
+    df = df.to_numpy()
     if tp == 'knife':
         # RA, DEC, weight
-        return np.column_stack((tb[:, 0], tb[:, 1], tb[:, 3]))
+        return np.column_stack((df[:, 0], df[:, 1], df[:, 3]))
     else:
-        return tb
+        return df
 
 
 def get_ra_dec(theta, phi):
