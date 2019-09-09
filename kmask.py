@@ -32,7 +32,7 @@ def jk_masks_w_bounds(mask, bound, froot, test=True):
                 if r[0] < r[1]:
                     if ra[i] >= r[0] and ra[i] <= r[1]:
                         jk_mask[ipix[i]] = 0.  # set pixel in the jk region to zero
-                else:  # regions corssing zero
+                else:  # regions crossing zero
                     if ra[i] >= r[0] or ra[i] <= r[1]:
                         jk_mask[ipix[i]] = 0.
 

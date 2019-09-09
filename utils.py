@@ -106,3 +106,19 @@ def combine_bounds(bds):
             continue
         data = np.row_stack((data, bd))
     return data
+
+
+def in_bound(ang, bd):
+    '''Check if array ang(ra,dec) are in the bound.'''
+    res = np.full(ang.shape[0], False, dtype=np.bool)
+    # check DEC
+    idx = np.where((bd[2] <= ang[:, 1]) & (ang[:, 1] <= bd[3]))[0]
+    ang = ang[idx]
+    # check RA
+    if bd[0] < bd[1]:
+        idx_ = np.where((bd[0] <= ang[:, 0]) & (ang[:, 1] <= bd[1]))[0]
+    else:  # region crossing zero
+        idx_ = np.where((bd[0] <= ang[:, 0]) | (ang[:, 1] <= bd[1]))[0]
+    res[idx[idx_]] = True
+
+    return res

@@ -21,7 +21,7 @@ def cut_in_ra(rand, w_ra, rra, nra):
 
     rand = rand[rand[:, 3].argsort()]  # sort along RA
     tmp, i0, j = 0., 0, 0
-    nps = len(rand[:, 0])
+    # nps = len(rand[:, 0])
 
     counter = 0
     for i1, p in enumerate(rand, 1):
@@ -49,7 +49,7 @@ def cut_in_dec(d_ra, w_dec, n_dec):
         rand = d_ra[i]  # points in the RA piece
         rand = rand[rand[:, 1].argsort()]  # sort each RA piece along DEC
         tmp, i0 = 0, 0
-        nps = len(rand[:, 0])
+        # nps = len(rand[:, 0])
         counter = 0
         for i1, p in enumerate(rand, 1):
             tmp += p[2]
@@ -76,7 +76,7 @@ def knife(data, njr, nra, rra):
     # make weights for RA pieces
     if njr % nra == 0:
         w_ra = np.full(nra, w_total/nra)
-        n_dec = np.full(nra, njr//nra) # number of dec per ra
+        n_dec = np.full(nra, njr//nra)  # number of dec per ra
     else:
         res = njr % (nra-1)
         ndec = (njr - res) / (nra - 1)
