@@ -38,6 +38,8 @@ def get_theta_phi(ra, dec):
     rot = hp.Rotator(coord=['C', 'G'])
     theta_equ, phi_equ = np.deg2rad(90.-dec), np.deg2rad(ra)
     theta_gal, phi_gal = rot(theta_equ, phi_equ)
+    # move phi in [-pi,0) to [pi,2pi)
+    phi_gal = np.where(phi_gal < 0., phi_gal + np.pi, phi_gal)
 
     return theta_gal, phi_gal
 
