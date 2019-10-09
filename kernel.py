@@ -9,8 +9,12 @@ import collections
 
 def cut_in_ra(rand, w_ra, rra, nra):
     '''Cut in the RA direction. RA in [0, 360].'''
-    print('>> Cutting in the RA direction')
     d_ra = collections.OrderedDict()
+    if nra == 1:  # only one RA piece
+        d_ra = rand.copy()
+        return d_ra
+
+    print('>> Cutting in the RA direction')
 
     if rra != 0.:  # rotate rra if cross 0
         print('++ Rotate RA for {0:f} degrees'.format(rra))
@@ -22,7 +26,6 @@ def cut_in_ra(rand, w_ra, rra, nra):
 
     rand = rand[rand[:, 3].argsort()]  # sort along RA
     tmp, i0, j = 0., 0, 0
-    # nps = len(rand[:, 0])
 
     counter = 0
     for i1, p in enumerate(rand, 1):
@@ -33,11 +36,12 @@ def cut_in_ra(rand, w_ra, rra, nra):
             j += 1
             tmp = 0.
             i0 = i1
-            if counter == nra - 1:
+            if counter == nra - 1:  # last RA piece
                 d_ra[j] = rand[i0:, :]
                 break
 
     del rand
+
     return d_ra
 
 
@@ -47,10 +51,14 @@ def cut_in_dec(d_ra, w_dec, n_dec):
     d_dec = collections.OrderedDict()
     j = 0
     for i in range(len(d_ra)):
+        if n_dec[i] == 1:  # only one DEC piece
+            d_dec[j] = d_ra[i]
+            j += 1
+
         rand = d_ra[i]  # points in the RA piece
         rand = rand[rand[:, 1].argsort()]  # sort each RA piece along DEC
         tmp, i0 = 0, 0
-        # nps = len(rand[:, 0])
+
         counter = 0
         for i1, p in enumerate(rand, 1):
             tmp += p[2]
@@ -60,12 +68,13 @@ def cut_in_dec(d_ra, w_dec, n_dec):
                 j += 1
                 tmp = 0.
                 i0 = i1
-                if counter == n_dec[i] - 1:
+                if counter == n_dec[i] - 1:  # last DEC piece
                     d_dec[j] = rand[i0:, :]
                     j += 1
                     break
 
     del d_ra
+
     return d_dec
 
 
