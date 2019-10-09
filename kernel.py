@@ -4,12 +4,13 @@ Kernel functions.
 import numpy as np
 import healpy as hp
 from . import utils
+import collections
 
 
 def cut_in_ra(rand, w_ra, rra, nra):
     '''Cut in the RA direction. RA in [0, 360].'''
     print('>> Cutting in the RA direction')
-    d_ra = {}
+    d_ra = collections.OrderedDict()
 
     if rra != 0.:  # rotate rra if cross 0
         print('++ Rotate RA for {0:f} degrees'.format(rra))
@@ -43,7 +44,7 @@ def cut_in_ra(rand, w_ra, rra, nra):
 def cut_in_dec(d_ra, w_dec, n_dec):
     '''Cut in the DEC direction. DEC in [-90, 90].'''
     print('>> Cutting in the DEC direction')
-    d_dec = {}
+    d_dec = collections.OrderedDict()
     j = 0
     for i in range(len(d_ra)):
         rand = d_ra[i]  # points in the RA piece
