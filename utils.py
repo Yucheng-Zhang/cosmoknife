@@ -118,9 +118,9 @@ def in_bound(ang, bd):
     ang = ang[idx]
     # check RA
     if bd[0] < bd[1]:
-        idx_ = np.where((bd[0] <= ang[:, 0]) & (ang[:, 1] <= bd[1]))[0]
+        idx_ = np.where((bd[0] <= ang[:, 0]) & (ang[:, 0] <= bd[1]))[0]
     else:  # region crossing zero
-        idx_ = np.where((bd[0] <= ang[:, 0]) | (ang[:, 1] <= bd[1]))[0]
+        idx_ = np.where((bd[0] <= ang[:, 0]) | (ang[:, 0] <= bd[1]))[0]
     res[idx[idx_]] = True
 
     return res
