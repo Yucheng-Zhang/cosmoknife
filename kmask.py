@@ -37,7 +37,7 @@ def jk_masks_w_bounds(mask, bound, froot, test=True):
                         jk_mask[ipix[i]] = 0.
 
         fn = froot + '_jk_{0:d}.fits'.format(j)
-        hp.write_map(fn, jk_mask)
+        hp.write_map(fn, jk_mask, dtype=jk_mask.dtype, overwrite=True)
         print('>> jk mask {0:d} : {1:s}'.format(j, fn))
         if test:
             test_mask = test_mask * jk_mask
