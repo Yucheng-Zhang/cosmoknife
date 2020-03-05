@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 #--- General ---#
 
 
-def load_data_pd(fn, tp=''):
+def load_data_pd(fn, tp='', verbose=True):
     '''Load data file.'''
-    print('>> Loading data: {}'.format(fn))
+    if verbose:
+        print('>> Loading data: {}'.format(fn))
     df = pd.read_csv(fn, delim_whitespace=True, comment='#', header=None)
     df = df.to_numpy()
     if tp == 'knife':
